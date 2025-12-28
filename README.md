@@ -1,54 +1,59 @@
-# Polygon Meow NFT Project 🐱💜 (Foundry Edition)
+# Polygon Meow NFT Project 🐱🏆
 
-Sui版「Meow NFT Project」の魂を受け継いだ、Polygon/Sepolia対応のNFTプロジェクトです。
-Foundryを使用して、高速かつ安全にNFTを発行・管理できます。
+Sui Testnet版の「Meow NFT Project」をベースに、Polygon (EVM) 環境へ移植したNFTプロジェクトです。
+Foundryを開発フレームワークに採用し、オンチェーンメタデータ方式によって画像URLと説明文をブロックチェーンに直接刻印します。
 
-## 🌟 特徴
-- **オンチェーンメタデータ**: JSONをオンチェーンで生成するため、画像URLさえあればミント可能。
-- **Foundry採用**: 高速なコンパイルと堅牢なスクリプト設計。
-- **Sui互換の思想**: シンプルなミント関数と構造。
+## 🌟 プロジェクトの要点
+- **オンチェーンメタデータ**: JSONデータをブロックチェーン内部で生成するため、外部のメタデータサーバーが不要。
+- **Sui互換の設計**: Sui版と同様、誰でもミント（発行）ができ、画像・名前・説明文を自由に指定可能。
+- **豪華なビューアー**: 数値を読み取るだけでなく、ブラウザで美しくNFTを確認できる専用ビューアーを同梱。
+- **セキュリティ**: 秘密鍵や環境変数は `.env` で管理し、GitHubには公開されない設定になっています。
 
-## 📁 構成
-- **`src/MeowNFT.sol`**: スマートコントラクト (ERC721)
-- **`script/`**: デプロイ・ミント用のFoundryスクリプト
-- **`deploy.sh`**: 【一撃】デプロイ用スクリプト
-- **`mint.sh`**: 【一撃】ミント用スクリプト
+## 📁 主要ファイルの説明
 
-## 🚀 はじめかた
+| ファイル名 | 役割 |
+| :--- | :--- |
+| `src/MeowNFT.sol` | NFTの本体（スマートコントラクト）。ERC721準拠。 |
+| `deploy.sh` | コントラクトを新規デプロイし、ブロックチェーン上に「工場」を建てるためのスクリプト。 |
+| `distribute.sh` | 指定した画像・説明文でNFTをミント（配布）するためのメインスクリプト。 |
+| `mint.sh` | `distribute.sh` から呼び出されるミント用の内部処理スクリプト。 |
+| `NFT_Viewer.html` | ミントしたNFTをブラウザで美しく表示・確認するための汎用ビューアー。 |
+| `DEPLOYED_ADDRESSES.md` | デプロイ済みのコントラクトアドレスを記録する管理帳。 |
+| `.env` | 秘密鍵（PRIVATE_KEY）やAPIキーを保存する設定ファイル（GitHub非公開）。 |
 
-### 1. 環境設定
-`.env` ファイルを作成し、秘密鍵を設定してください。
+## 🚀 使い方ガイド
+
+### 1. 準備
+- `.env` ファイルを作成し、メタマスクの秘密鍵を設定します。
 ```bash
 cp config.env.sample .env
+# 秘密鍵を PRIVATE_KEY=0x... の形式で記入
 ```
-その後、`.env` を開き、以下の項目を入力します：
-- `PRIVATE_KEY`: あなたのメタマスクの秘密鍵 (0x...)
 
-### 2. コントラクトのデプロイ
-Sepoliaテストネットにデプロイします。
+### 2. デプロイ（工場の設置）
+最新のプログラムをブロックチェーンに公開します。
 ```bash
 ./deploy.sh sepolia
 ```
-成功すると、ターミナルに `MeowNFT deployed to: 0x...` と表示されます。このアドレスをメモしてください。
+実行後、表示される `Contract Address` を `DEPLOYED_ADDRESSES.md` にメモします。
 
-### 3. NFTのミント (発行)
-取得したコントラクトアドレスを使って、NFTを発行します。
+### 3. ミント（NFTの発行・配布）
+お好みの画像（IPFS）を設定してNFTを発行します。
+1. `distribute.sh` を開き、冒頭の `DEFAULT_NAME` や `DEFAULT_IMAGE` を書き換える。
+2. 以下のコマンドを実行：
 ```bash
-./mint.sh [CONTRACT_ADDR] [RECIPIENT_ADDR] "Meow Title" "Meow Description" "ipfs://CID" sepolia
+# ./distribute.sh [コントラクトアドレス] [受取人のアドレス] [ネットワーク]
+./distribute.sh 0x27188ac3AFE630d3468F532a9dD787bC412CC024 0x3909... sepolia
 ```
-※ 引数の最後に `polygon` を指定すると、Polygonメインネットで実行されます（要MATIC）。
 
-## 🛠 便利なコマンド
+### 4. 確認（ビューアー）
+1. `NFT_Viewer.html` をブラウザで開きます。
+2. ミント完了時に表示された **Contract Address** と **Token ID** を入力します。
+3. 「データを読み込む」を押すと、あなたのNFTが「いい感じ」に表示されます！
 
-| 操作 | コマンド |
-| :--- | :--- |
-| **ビルド** | `forge build` |
-| **テスト** | `forge test` |
-| **コントラクト検証** | `forge verify-contract [ADDR] MeowNFT --rpc-url [URL]` |
-
-## 📍 ネットワーク情報
-- **Sepolia**: テスト用。
-- **Polygon**: 本番用。
+## 💜 本番 (Polygon) への移行
+1. 自分のウォレットに少額の $MATIC を用意します。
+2. `deploy.sh` と `distribute.sh` のネットワーク引数を `polygon` に変えて実行するだけです。
 
 ---
-*Created by Antigravity for Kazuki's local project.*
+*Created by torusk with Katana/Antigravity assistance.*
