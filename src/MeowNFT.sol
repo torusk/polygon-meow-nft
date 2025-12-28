@@ -29,6 +29,7 @@ contract MeowNFT is ERC721URIStorage, Ownable {
         _safeMint(recipient, tokenId);
 
         // オンチェーンでメタデータを生成
+        // 特殊文字対策として、できるだけ安全な形式で構築します
         string memory json = Base64.encode(
             bytes(
                 string(
@@ -36,7 +37,10 @@ contract MeowNFT is ERC721URIStorage, Ownable {
                         '{"name": "', name, '",',
                         '"description": "', description, '",',
                         '"image": "', imageURL, '",',
-                        '"attributes": [{"trait_type": "CreatedWith", "value": "Antigravity"}]}'
+                        '"attributes": [',
+                            '{"trait_type": "CreatedBy", "value": "Team Meow Chain"},',
+                            '{"trait_type": "CreatedWith", "value": "Antigravity"}',
+                        ']}'
                     )
                 )
             )

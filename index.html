@@ -6,29 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meow NFT Previewer 🐱</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --secondary: #ec4899;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --muted: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e2e8f0;
+            --input-bg: #f9fafb;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg);
-            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
-                radial-gradient(at 50% 0%, rgba(236, 72, 153, 0.1) 0, transparent 50%);
             color: var(--text);
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 80px 20px;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
@@ -38,81 +38,98 @@
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            color: var(--text);
+            letter-spacing: -0.025em;
         }
 
         .subtitle {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--muted);
-            margin-bottom: 30px;
+            margin-bottom: 48px;
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            background: white;
+            background: var(--input-bg);
             padding: 24px;
-            border-radius: 20px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            border: 1px solid var(--border);
         }
 
         .input-group input {
-            padding: 12px;
+            padding: 14px;
             border-radius: 10px;
-            border: 1px solid #cbd5e1;
-            background: #f1f5f9;
+            border: 1px solid var(--border);
+            background: #ffffff;
             color: var(--text);
             width: 100%;
             box-sizing: border-box;
             font-family: inherit;
-            transition: border-color 0.2s;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
         }
 
         .input-group input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
         }
 
         .btn {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
+            background-color: var(--primary);
             border: none;
             padding: 14px 28px;
             color: white;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             font-size: 1rem;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-connect {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            margin-bottom: 16px;
+            padding: 10px 20px;
+            font-size: 0.875rem;
+            border-radius: 8px;
+        }
+
+        .btn-connect:hover {
+            background-color: #f3f4f6;
+            color: var(--text);
+            border-color: #d1d5db;
         }
 
         #nft-card {
-            margin-top: 40px;
+            margin-top: 48px;
             background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 28px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
             padding: 32px;
             display: none;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
         }
 
-        @keyframes fadeIn {
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(12px);
             }
 
             to {
@@ -123,28 +140,29 @@
 
         #nft-image {
             width: 100%;
-            border-radius: 20px;
-            margin-bottom: 25px;
+            border-radius: 12px;
+            margin-bottom: 24px;
             object-fit: cover;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            background: #f1f5f9;
         }
 
         .nft-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #0f172a;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: var(--text);
+            letter-spacing: -0.01em;
         }
 
         .nft-desc {
-            font-size: 1rem;
-            color: #334155;
-            line-height: 1.7;
-            text-align: left;
-            background: #f8fafc;
+            font-size: 0.95rem;
+            color: #374151;
+            line-height: 1.625;
+            background: var(--input-bg);
             padding: 24px;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            border: 1px solid var(--border);
             white-space: pre-wrap;
         }
 
@@ -152,35 +170,32 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-top: 25px;
-            font-size: 0.85rem;
+            margin-top: 24px;
+            font-size: 0.8125rem;
             color: var(--muted);
-            text-align: left;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
         }
 
         #status {
-            margin-top: 20px;
+            margin-top: 16px;
             color: var(--muted);
-            font-size: 0.9rem;
+            font-size: 0.8125rem;
         }
 
         .loader {
-            border: 3px solid #e2e8f0;
+            border: 3px solid #f3f4f6;
             border-top: 3px solid var(--primary);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
             display: none;
-            margin: 20px auto;
+            margin: 24px auto;
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
+            to {
                 transform: rotate(360deg);
             }
         }
@@ -192,18 +207,13 @@
         <h1>Meow NFT Viewer</h1>
         <p class="subtitle">オンチェーン情報を Sui のように美しく表示します</p>
 
-        <div class="input-group"
-            style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
-            <input type="text" id="contract-input" placeholder="Contract Address (0x...)"
-                style="padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; width: 100%; box-sizing: border-box; font-family: inherit;">
-            <input type="number" id="id-input" placeholder="Token ID"
-                style="padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; width: 100%; box-sizing: border-box; font-family: inherit;">
+        <div class="input-group">
+            <input type="text" id="contract-input" placeholder="Contract Address (0x...)">
+            <input type="number" id="id-input" placeholder="Token ID">
             <button id="load-btn" class="btn">データを読み込む</button>
         </div>
 
-        <button id="connect-btn" class="btn"
-            style="background: transparent; border: 1px solid var(--secondary); margin-bottom: 10px; font-size: 0.9rem;">Connect
-            MetaMask</button>
+        <button id="connect-btn" class="btn btn-connect">Connect MetaMask</button>
         <div id="status">情報を入力して「データを読み込む」を押してください</div>
         <div id="loader" class="loader"></div>
 
@@ -220,11 +230,9 @@
     </div>
 
     <script>
-        // デフォルト設定
         const DEFAULT_CONTRACT = "0x27188ac3AFE630d3468F532a9dD787bC412CC024";
         const DEFAULT_TOKEN_ID = "0";
 
-        // DOM要素の取得
         const contractInput = document.getElementById('contract-input');
         const idInput = document.getElementById('id-input');
         const loadBtn = document.getElementById('load-btn');
@@ -238,7 +246,6 @@
         const contractDisplay = document.getElementById('contract-addr');
         const tokenIdDisplay = document.getElementById('token-id');
 
-        // 安全にJSONをパースする関数
         function safeJSONParse(str) {
             try {
                 return JSON.parse(str);
@@ -251,7 +258,6 @@
             }
         }
 
-        // 初期ロード処理
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const contractParam = urlParams.get('contract');
@@ -263,10 +269,9 @@
             if (idParam) idInput.value = idParam;
             else idInput.value = DEFAULT_TOKEN_ID;
 
-            await loadNFT(true); // 自動で読み込み開始
+            await loadNFT(true);
         };
 
-        // NFT読み込みメイン処理
         async function loadNFT(readOnly = false) {
             const targetContract = contractInput.value.trim();
             const targetId = idInput.value.trim();
@@ -279,18 +284,18 @@
             try {
                 loader.style.display = 'block';
                 nftCard.style.display = 'none';
-                status.innerText = "オンチェーンデータを取得中...";
+                status.innerText = "データをロード中...";
 
                 let provider;
                 if (!readOnly && window.ethereum) {
                     provider = new ethers.BrowserProvider(window.ethereum);
                     await provider.send("eth_requestAccounts", []);
                     const accounts = await provider.listAccounts();
-                    status.innerText = "ウォレット接続済み: " + accounts[0].address.substring(0, 6) + "...";
+                    status.innerText = "ウォレット接続済み";
                     connectBtn.style.display = 'none';
                 } else {
                     provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-                    status.innerText = "ネットワークから直接読み取り中...";
+                    status.innerText = "ネットワークから読み取り中...";
                 }
 
                 const abi = ["function tokenURI(uint256) view returns (string)"];
@@ -315,7 +320,7 @@
                 const imageUrl = metadata.image ? metadata.image.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/') : '';
                 imageDisplay.src = imageUrl;
 
-                contractDisplay.innerText = targetContract.substring(0, 6) + "..." + targetContract.substring(38);
+                contractDisplay.innerText = targetContract;
                 tokenIdDisplay.innerText = targetId;
 
                 nftCard.style.display = 'block';
