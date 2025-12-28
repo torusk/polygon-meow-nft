@@ -39,8 +39,8 @@ OUTPUT=$(forge script script/DeployMeow.s.sol:DeployMeow \
 
 echo "$OUTPUT"
 
-# コントラクトアドレスをログから抽出 (Deployed to: 0x...)
-CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | awk '{print $3}')
+# コントラクトアドレスをログから抽出 (Deployed to: 0x... または Contract Address: 0x...)
+CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep -E "Deployed to:|Contract Address:|deployed to:" | grep -oE "0x[a-fA-F0-9]{40}" | head -n 1)
 
 if [ -n "$CONTRACT_ADDRESS" ]; then
     echo "--------------------------------------------------"
