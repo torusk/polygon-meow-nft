@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meow NFT Collection 🐱</title>
+    <title>Meow NFT Explorer 🐱</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -54,7 +54,6 @@
             margin-bottom: 24px;
         }
 
-        /* タブ切り替え */
         .tabs {
             display: flex;
             gap: 10px;
@@ -80,7 +79,6 @@
             border-color: var(--primary);
         }
 
-        /* セクション管理 */
         .view-section {
             background: #f8fafc;
             padding: 30px;
@@ -94,7 +92,6 @@
             display: block;
         }
 
-        /* 手動入力フォーム */
         .input-group {
             display: flex;
             flex-direction: column;
@@ -138,7 +135,6 @@
             transform: translateY(-1px);
         }
 
-        /* NFTカード */
         #nft-container {
             display: grid;
             gap: 30px;
@@ -193,6 +189,7 @@
             border: 1px solid var(--border);
             margin-bottom: 15px;
             white-space: pre-wrap;
+            word-break: break-all;
         }
 
         .nft-meta {
@@ -234,7 +231,7 @@
     <div class="container">
         <header>
             <h1>Meow NFT Explorer</h1>
-            <p class="tagline">オンチェーン情報を Sui のように美しく表示します</p>
+            <p class="tagline">オンチェーン情報を美しいカード形式で表示します</p>
         </header>
 
         <div class="tabs">
@@ -242,7 +239,6 @@
             <button class="tab-btn" onclick="switchTab('wallet')">ウォレットをスキャン</button>
         </div>
 
-        <!-- 手動入力セクション -->
         <div id="manual-section" class="view-section active">
             <div class="input-group">
                 <div>
@@ -257,7 +253,6 @@
             </div>
         </div>
 
-        <!-- ウォレットスキャンセクション -->
         <div id="wallet-section" class="view-section">
             <p style="font-size: 0.9rem; margin-bottom: 20px; color: var(--muted);">
                 MetaMaskを接続して、あなたが所有しているNFTを自動で見つけます。
@@ -265,32 +260,34 @@
             <button id="connect-btn" class="btn-main">Connect MetaMask</button>
         </div>
 
-        <div id="status">情報を入力して検索、またはウォレットを接続してください</div>
+        <div id="status">情報を入力して検索してください</div>
         <div id="loader" class="loader"></div>
-
-        <div id="nft-container">
-            <!-- ここにNFTが表示される -->
-        </div>
+        <div id="nft-container"></div>
     </div>
 
     <script>
         const DEFAULT_CONTRACT = "0x27188ac3AFE630d3468F532a9dD787bC412CC024";
         const RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
+        const IPFS_GATEWAYS = [
+            "https://gateway.pinata.cloud/ipfs/",
+            "https://cloudflare-ipfs.com/ipfs/",
+            "https://ipfs.io/ipfs/",
+            "https://dweb.link/ipfs/"
+        ];
 
+        const contractInput = document.getElementById('contract-input');
+        const idInput = document.getElementById('id-input');
         const loadBtn = document.getElementById('load-btn');
         const connectBtn = document.getElementById('connect-btn');
         const status = document.getElementById('status');
         const loader = document.getElementById('loader');
         const nftContainer = document.getElementById('nft-container');
-        const contractInput = document.getElementById('contract-input');
-        const idInput = document.getElementById('id-input');
 
         contractInput.value = DEFAULT_CONTRACT;
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-
             if (tab === 'manual') {
                 document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
                 document.getElementById('manual-section').classList.add('active');
@@ -300,62 +297,56 @@
             }
         }
 
+        // 破損したJSONを可能な限り修復してパースする
         function safeJSONParse(str) {
-            try { return JSON.parse(str); }
-            catch (e) {
-                const fixed = str.replace(/": "(.*?)",/g, (match, p1) => {
-                    return '": "' + p1.replace(/"/g, '\\"') + '",';
-                });
-                return JSON.parse(fixed);
+            try {
+                return JSON.parse(str);
+            } catch (e) {
+                console.warn("JSON repair attempt...");
+                try {
+                    // 説明文内の未エスケープの " をエスケープする
+                    let fixed = str.replace(/": "(.*?)",/g, (match, p1) => '": "' + p1.replace(/"/g, '\\"') + '",');
+                    fixed = fixed.replace(/": "(.*?)"\}/g, (match, p1) => '": "' + p1.replace(/"/g, '\\"') + '"}');
+                    return JSON.parse(fixed);
+                } catch (e2) {
+                    console.error("JSON repair failed", e2);
+                    throw e;
+                }
             }
         }
 
-        // 手動読み込み
         async function loadManual() {
             const addr = contractInput.value.trim();
             const id = idInput.value.trim();
             if (!addr || id === "") return;
-
             try {
                 loader.style.display = 'block';
                 nftContainer.innerHTML = '';
                 status.innerText = "データを取得中...";
-
                 const provider = new ethers.JsonRpcProvider(RPC_URL);
                 const abi = ["function tokenURI(uint256) view returns (string)"];
                 const contract = new ethers.Contract(addr, abi, provider);
-
                 await renderNFT(contract, id);
-
                 loader.style.display = 'none';
-                status.innerText = "読み込み完了！";
+                status.innerText = "読み込み完了";
             } catch (err) {
-                console.error(err);
                 status.innerText = "エラー: " + err.message;
                 loader.style.display = 'none';
             }
         }
 
-        // ウォレットスキャン
         async function scanWallet() {
-            if (!window.ethereum) { alert("MetaMaskをインストールしてください！"); return; }
+            if (!window.ethereum) { alert("MetaMaskをインストールしてください"); return; }
             try {
                 loader.style.display = 'block';
                 nftContainer.innerHTML = '';
-                status.innerText = "接続中...";
-
+                status.innerText = "ウォレットに接続中...";
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const accounts = await provider.send("eth_requestAccounts", []);
                 const user = accounts[0];
-
-                status.innerText = "スキャン中...";
                 const addr = contractInput.value.trim();
-                const abi = [
-                    "function tokenURI(uint256) view returns (string)",
-                    "function ownerOf(uint256) view returns (address)"
-                ];
+                const abi = ["function tokenURI(uint256) view returns (string)", "function ownerOf(uint256) view returns (address)"];
                 const contract = new ethers.Contract(addr, abi, provider);
-
                 let count = 0;
                 for (let i = 0; i <= 20; i++) {
                     try {
@@ -366,9 +357,8 @@
                         }
                     } catch (e) { continue; }
                 }
-
                 loader.style.display = 'none';
-                status.innerText = count > 0 ? `${count} 個見つかりました！` : "見つかりませんでした。";
+                status.innerText = count > 0 ? `${count} 個見つかりました` : "見つかりませんでした";
             } catch (err) {
                 status.innerText = "エラー: " + err.message;
                 loader.style.display = 'none';
@@ -378,39 +368,46 @@
         async function renderNFT(contract, id) {
             const tokenUri = await contract.tokenURI(id);
             let metadata;
-
             if (tokenUri.startsWith('data:application/json;base64,')) {
-                const base64 = tokenUri.split(',')[1];
-                metadata = safeJSONParse(atob(base64));
+                metadata = safeJSONParse(atob(tokenUri.split(',')[1]));
             } else {
-                const response = await fetch(tokenUri.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/'));
-                metadata = safeJSONParse(await response.text());
+                const url = tokenUri.replace('ipfs://', IPFS_GATEWAYS[0]);
+                const res = await fetch(url);
+                metadata = safeJSONParse(await res.text());
             }
 
+            const imageUrl = metadata.image.replace('ipfs://', '');
             const card = document.createElement('div');
             card.className = 'nft-card';
-            const imageUrl = metadata.image.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
-
             card.innerHTML = `
-                <img src="${imageUrl}" class="nft-image" alt="NFT">
+                <img src="${IPFS_GATEWAYS[0]}${imageUrl}" class="nft-image" alt="NFT" data-cid="${imageUrl}">
                 <div class="nft-title">${metadata.name || 'No Name'}</div>
                 <div class="nft-desc">${metadata.description || 'No Description'}</div>
                 <div class="nft-meta">
                     <span><strong>Token ID:</strong> ${id}</span>
-                    <span><strong>Contract:</strong> ${contract.target.substring(0, 10)}...</span>
+                    <span><strong>Contract:</strong> ${contract.target}</span>
                 </div>
             `;
+
+            // 画像フォールバックロジック
+            const img = card.querySelector('img');
+            let gwIdx = 0;
+            img.onerror = () => {
+                gwIdx++;
+                if (gwIdx < IPFS_GATEWAYS.length) {
+                    img.src = IPFS_GATEWAYS[gwIdx] + img.dataset.cid;
+                } else {
+                    img.src = 'https://placehold.co/400x400?text=Image+Unavailable';
+                    img.onerror = null;
+                }
+            };
             nftContainer.appendChild(card);
         }
 
-        // 初期ロード
         window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('contract')) contractInput.value = params.get('contract');
-            if (params.get('id')) {
-                idInput.value = params.get('id');
-                loadManual();
-            }
+            const p = new URLSearchParams(window.location.search);
+            if (p.get('contract')) contractInput.value = p.get('contract');
+            if (p.get('id')) { idInput.value = p.get('id'); loadManual(); }
         };
 
         loadBtn.addEventListener('click', loadManual);
