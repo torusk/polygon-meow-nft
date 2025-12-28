@@ -17,11 +17,11 @@ fi
 RECIPIENT_ADDRESS=$1
 NETWORK=${2:-sepolia}
 
-# コントラクトアドレスを DEPLOYED_ADDRESSES.md から自動取得
+# コントラクトアドレスを DEPLOYED_ADDRESSES.md から自動取得（最新のものを取得）
 if [ "$NETWORK" == "polygon" ]; then
-    CONTRACT_ADDRESS=$(grep "Polygon (Mainnet)" -A 2 DEPLOYED_ADDRESSES.md | grep "Latest Address" | grep -o '0x[a-fA-F0-9]\{40\}')
+    CONTRACT_ADDRESS=$(sed -n '/## 💜 Polygon (Mainnet)/,/---/p' DEPLOYED_ADDRESSES.md | grep -o '0x[a-fA-F0-9]\{40\}' | tail -n 1)
 else
-    CONTRACT_ADDRESS=$(grep "Sepolia (Testnet)" -A 2 DEPLOYED_ADDRESSES.md | grep "Latest Address" | grep -o '0x[a-fA-F0-9]\{40\}')
+    CONTRACT_ADDRESS=$(sed -n '/## 🧪 Sepolia (Testnet)/,/## 💜 Polygon (Mainnet)/p' DEPLOYED_ADDRESSES.md | grep -o '0x[a-fA-F0-9]\{40\}' | tail -n 1)
 fi
 
 # チェック
