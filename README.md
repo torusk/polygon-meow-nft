@@ -27,10 +27,14 @@ Sui Testnet版で展開していた「Meow NFT Project」をベースに、Polyg
 
 ## 🚀 クイックスタートガイド
 
-### 1. 環境構築
-まずは環境変数の準備を行います。`.env` ファイルを作成し、必要な情報を記入してください。
+### 1. 準備
+リポジトリをクローンし、依存ライブラリをインストールして環境変数を設定します。
 
 ```bash
+# 依存ライブラリのインストール（重要）
+forge install
+
+# 環境変数の設定
 cp config.env.sample .env
 # エディタで開き、PRIVATE_KEY=0x... と ALCHEMY_API_KEY=... を設定
 ```
