@@ -48,12 +48,15 @@ if [ -n "$CONTRACT_ADDRESS" ]; then
     echo "Contract Address: $CONTRACT_ADDRESS"
     echo "--------------------------------------------------"
 
-    # DEPLOYED_ADDRESSES.md への自動記録
+    # DEPLOYED_ADDRESSES.md への自動記録 (上書き)
     DATE=$(date +%Y-%m-%d)
     if [ "$NETWORK" == "polygon" ]; then
         sed -i '' "s/- \*\*Latest Address\*\*: (未デプロイ)/- **Latest Address**: \`$CONTRACT_ADDRESS\` (Updated: $DATE)/" DEPLOYED_ADDRESSES.md
+        sed -i '' "s|- \*\*Latest Address\*\*: \`0x[a-fA-F0-9]\{40\}\`.*|- **Latest Address**: \`$CONTRACT_ADDRESS\` (Updated: $DATE)|" DEPLOYED_ADDRESSES.md
     else
-        sed -i '' "s/- \*\*Latest Address\*\*: 0x.*/- **Latest Address**: \`$CONTRACT_ADDRESS\` (Updated: $DATE)/" DEPLOYED_ADDRESSES.md
+        sed -i '' "s|- \*\*Latest Address\*\*: \`0x[a-fA-F0-9]\{40\}\`.*|- **Latest Address**: \`$CONTRACT_ADDRESS\` (Updated: $DATE)|" DEPLOYED_ADDRESSES.md
+        # バックティックがない場合のためのフォールバック
+        sed -i '' "s|- \*\*Latest Address\*\*: 0x[a-fA-F0-9]\{40\}.*|- **Latest Address**: \`$CONTRACT_ADDRESS\` (Updated: $DATE)|" DEPLOYED_ADDRESSES.md
     fi
     echo "📝 DEPLOYED_ADDRESSES.md にアドレスを自動記録しました。"
 else
