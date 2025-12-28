@@ -13,15 +13,30 @@ else
     exit 1
 fi
 
-CONTRACT_ADDRESS=$1
-RECIPIENT_ADDRESS=$2
-NETWORK=${3:-sepolia}
+# 引数の処理
+RECIPIENT_ADDRESS=$1
+NETWORK=${2:-sepolia}
 
-if [ -z "$CONTRACT_ADDRESS" ] || [ -z "$RECIPIENT_ADDRESS" ]; then
-    echo "Usage: ./distribute.sh <CONTRACT_ADDRESS> <RECIPIENT_ADDRESS> [NETWORK]"
+# コントラクトアドレスを DEPLOYED_ADDRESSES.md から自動取得
+if [ "$NETWORK" == "polygon" ]; then
+    CONTRACT_ADDRESS=$(grep "Polygon (Mainnet)" -A 2 DEPLOYED_ADDRESSES.md | grep "Latest Address" | grep -o '0x[a-fA-F0-9]\{40\}')
+else
+    CONTRACT_ADDRESS=$(grep "Sepolia (Testnet)" -A 2 DEPLOYED_ADDRESSES.md | grep "Latest Address" | grep -o '0x[a-fA-F0-9]\{40\}')
+fi
+
+# チェック
+if [ -z "$CONTRACT_ADDRESS" ]; then
+    echo "❌ エラー: DEPLOYED_ADDRESSES.md から最新のアドレスを取得できませんでした。"
+    echo "先に ./deploy.sh $NETWORK を実行してください。"
     exit 1
 fi
 
+if [ -z "$RECIPIENT_ADDRESS" ]; then
+    echo "使用法: ./distribute.sh [宛先アドレス] [ネットワーク(任意: デフォルトsepolia)]"
+    exit 1
+fi
+
+echo "📍 最新のコントラクトを使用します: $CONTRACT_ADDRESS"
 ./mint.sh "$CONTRACT_ADDRESS" "$RECIPIENT_ADDRESS" "$DEFAULT_NAME" "$DEFAULT_DESC" "$DEFAULT_IMAGE" "$NETWORK"
 
 echo "--------------------------------------------------"

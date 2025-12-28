@@ -30,8 +30,33 @@ fi
 echo "Using Alchemy API Key: ${ALCHEMY_API_KEY:0:5}***"
 echo "Deploying MeowNFT to $NETWORK..."
 
-forge script script/DeployMeow.s.sol:DeployMeow \
+# デプロイ実行とアドレスの抽出
+OUTPUT=$(forge script script/DeployMeow.s.sol:DeployMeow \
     --rpc-url $RPC_URL \
     --broadcast \
     --verify \
-    -vvvv
+    -vvvv)
+
+echo "$OUTPUT"
+
+# コントラクトアドレスをログから抽出 (Deployed to: 0x...)
+CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | awk '{print $3}')
+
+if [ -n "$CONTRACT_ADDRESS" ]; then
+    echo "--------------------------------------------------"
+    echo "🚀 デプロイが完了しました！"
+    echo "Contract Address: $CONTRACT_ADDRESS"
+    echo "--------------------------------------------------"
+
+    # DEPLOYED_ADDRESSES.md への自動記録
+    DATE=$(date +%Y-%m-%d)
+    if [ "$NETWORK" == "polygon" ]; then
+        sed -i '' "s/- \*\*Latest Address\*\*: (未デプロイ)/- **Latest Address**: \`$CONTRACT_ADDRESS\` (Updated: $DATE)/" DEPLOYED_ADDRESSES.md
+    else
+        sed -i '' "s/- \*\*Latest Address\*\*: 0x.*/- **Latest Address**: \`$CONTRACT_ADDRESS\` (Updated: $DATE)/" DEPLOYED_ADDRESSES.md
+    fi
+    echo "📝 DEPLOYED_ADDRESSES.md にアドレスを自動記録しました。"
+else
+    echo "❌ デプロイに失敗したか、アドレスの抽出に失敗しました。"
+    exit 1
+fi

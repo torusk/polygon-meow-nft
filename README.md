@@ -40,10 +40,10 @@ cp config.env.sample .env
 ### 3. ミント（NFTの発行・配布）
 お好みの画像（IPFS）を設定してNFTを発行します。
 1. `distribute.sh` を開き、冒頭の `DEFAULT_NAME` や `DEFAULT_IMAGE` を書き換える。
-2. 以下のコマンドを実行：
+2. 以下のコマンドを実行（コントラクトアドレスは自動取得されます）：
 ```bash
-# ./distribute.sh [コントラクトアドレス] [受取人のアドレス] [ネットワーク]
-./distribute.sh 0x27188ac3AFE630d3468F532a9dD787bC412CC024 0x3909... sepolia
+# ./distribute.sh [受取人のアドレス] [ネットワーク(任意)]
+./distribute.sh 0x3909... sepolia
 ```
 
 ### 4. 確認（ビューアー）
@@ -68,7 +68,7 @@ Polygonメインネットでの運用コストは非常に低く抑えられま�
 2. `deploy.sh` と `distribute.sh` のネットワーク引数を `polygon` に変えて実行するだけです。
    ```bash
    ./deploy.sh polygon
-   ./distribute.sh [新アドレス] [宛先アドレス] polygon
+   ./distribute.sh [宛先アドレス] polygon
    ```
 
 
