@@ -42,12 +42,12 @@ echo "📍 最新のコントラクトを使用します: $CONTRACT_ADDRESS"
 echo "--------------------------------------------------"
 echo "🚀 ミントが完了しました！"
 echo ""
-echo "以下の情報を index.html に入力して確認してください："
+echo "以下の情報を NFT Viewer で入力して確認してください："
 echo "--------------------------------------------------"
-echo "【Contract Address】: $CONTRACT_ADDRESS"
-echo "【Token ID】       : （上のログの 'Minted NFT with ID: X' の数字を見てください）"
+echo "【Contract Address】 : $CONTRACT_ADDRESS"
+echo "【Token ID】         : （上のログの 'Minted NFT with ID: X' の数字を見てください）"
 echo "--------------------------------------------------"
-echo "🌐 ブラウザで index.html を開き、上記を入力して「データを読み込む」をクリック！"
+echo "🌐 別プロジェクトの 'NFT Viewer' を起動し、上記を入力して内容を確認してください。"
 
 
 
