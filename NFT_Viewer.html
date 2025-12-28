@@ -9,16 +9,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #8b5cf6;
+            --primary: #6366f1;
             --secondary: #ec4899;
-            --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text: #f8fafc;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            background-color: var(--bg);
+            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
+                radial-gradient(at 50% 0%, rgba(236, 72, 153, 0.1) 0, transparent 50%);
             color: var(--text);
             margin: 0;
             display: flex;
@@ -37,44 +40,73 @@
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            background: linear-gradient(to right, #a78bfa, #f472b6);
+            background: linear-gradient(to right, var(--primary), var(--secondary));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .subtitle {
             font-size: 1.1rem;
-            color: #94a3b8;
+            color: var(--muted);
             margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group input {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            background: #f1f5f9;
+            color: var(--text);
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         .btn {
             background: linear-gradient(to right, var(--primary), var(--secondary));
             border: none;
-            padding: 12px 24px;
+            padding: 14px 28px;
             color: white;
             border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
             font-size: 1rem;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
         }
 
         #nft-card {
             margin-top: 40px;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 30px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 28px;
+            padding: 32px;
             display: none;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes fadeIn {
@@ -91,47 +123,49 @@
 
         #nft-image {
             width: 100%;
-            border-radius: 16px;
+            border-radius: 20px;
             margin-bottom: 25px;
             object-fit: cover;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         .nft-title {
             font-size: 1.8rem;
             font-weight: 600;
-            margin-bottom: 15px;
-            color: white;
+            margin-bottom: 20px;
+            color: #0f172a;
         }
 
         .nft-desc {
             font-size: 1rem;
-            color: #cbd5e1;
-            line-height: 1.6;
+            color: #334155;
+            line-height: 1.7;
             text-align: left;
-            background: rgba(15, 23, 42, 0.5);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
             white-space: pre-wrap;
         }
 
         .meta-info {
             display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 25px;
             font-size: 0.85rem;
-            color: #64748b;
+            color: var(--muted);
+            text-align: left;
         }
 
         #status {
             margin-top: 20px;
-            color: #94a3b8;
+            color: var(--muted);
             font-size: 0.9rem;
         }
 
         .loader {
-            border: 3px solid #f3f3f3;
+            border: 3px solid #e2e8f0;
             border-top: 3px solid var(--primary);
             border-radius: 50%;
             width: 30px;
@@ -156,10 +190,21 @@
 <body>
     <div class="container">
         <h1>Meow NFT Viewer</h1>
-        <p class="subtitle">Suiのように美しくオンチェーン情報を表示します</p>
+        <p class="subtitle">オンチェーン情報を Sui のように美しく表示します</p>
 
-        <button id="connect-btn" class="btn">Connect MetaMask</button>
-        <div id="status">ウォレットを接続してロードしてください</div>
+        <div class="input-group"
+            style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <input type="text" id="contract-input" placeholder="Contract Address (0x...)"
+                style="padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; width: 100%; box-sizing: border-box; font-family: inherit;">
+            <input type="number" id="id-input" placeholder="Token ID"
+                style="padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; width: 100%; box-sizing: border-box; font-family: inherit;">
+            <button id="load-btn" class="btn">データを読み込む</button>
+        </div>
+
+        <button id="connect-btn" class="btn"
+            style="background: transparent; border: 1px solid var(--secondary); margin-bottom: 10px; font-size: 0.9rem;">Connect
+            MetaMask</button>
+        <div id="status">情報を入力して「データを読み込む」を押してください</div>
         <div id="loader" class="loader"></div>
 
         <div id="nft-card">
@@ -175,10 +220,14 @@
     </div>
 
     <script>
-        // 今回デプロイされたコントラクト
-        const CONTRACT_ADDRESS = "0x4d076006A1cb19cc2dc6d826fee444FB7e30a63d";
-        const TOKEN_ID = 0; // 今回ミントしたID
+        // デフォルト設定
+        const DEFAULT_CONTRACT = "0x27188ac3AFE630d3468F532a9dD787bC412CC024";
+        const DEFAULT_TOKEN_ID = "0";
 
+        // DOM要素の取得
+        const contractInput = document.getElementById('contract-input');
+        const idInput = document.getElementById('id-input');
+        const loadBtn = document.getElementById('load-btn');
         const connectBtn = document.getElementById('connect-btn');
         const status = document.getElementById('status');
         const loader = document.getElementById('loader');
@@ -189,14 +238,47 @@
         const contractDisplay = document.getElementById('contract-addr');
         const tokenIdDisplay = document.getElementById('token-id');
 
-        // 初期ロードで自動実行
+        // 安全にJSONをパースする関数
+        function safeJSONParse(str) {
+            try {
+                return JSON.parse(str);
+            } catch (e) {
+                console.warn("JSONパースエラー。修復を試みます...", e);
+                const fixed = str.replace(/": "(.*?)",/g, (match, p1) => {
+                    return '": "' + p1.replace(/"/g, '\\"') + '",';
+                });
+                return JSON.parse(fixed);
+            }
+        }
+
+        // 初期ロード処理
         window.onload = async () => {
-            await loadNFT(true); // 読み取り専用モード
+            const urlParams = new URLSearchParams(window.location.search);
+            const contractParam = urlParams.get('contract');
+            const idParam = urlParams.get('id');
+
+            if (contractParam) contractInput.value = contractParam;
+            else contractInput.value = DEFAULT_CONTRACT;
+
+            if (idParam) idInput.value = idParam;
+            else idInput.value = DEFAULT_TOKEN_ID;
+
+            await loadNFT(true); // 自動で読み込み開始
         };
 
+        // NFT読み込みメイン処理
         async function loadNFT(readOnly = false) {
+            const targetContract = contractInput.value.trim();
+            const targetId = idInput.value.trim();
+
+            if (!targetContract || targetId === "") {
+                status.innerText = "コントラクトアドレスとIDを入力してください";
+                return;
+            }
+
             try {
                 loader.style.display = 'block';
+                nftCard.style.display = 'none';
                 status.innerText = "オンチェーンデータを取得中...";
 
                 let provider;
@@ -207,54 +289,47 @@
                     status.innerText = "ウォレット接続済み: " + accounts[0].address.substring(0, 6) + "...";
                     connectBtn.style.display = 'none';
                 } else {
-                    // 公共RPCを使用してメタマスクなしでも表示可能にする
                     provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-                    status.innerText = "Sepoliaネットワークから直接読み取り中...";
+                    status.innerText = "ネットワークから直接読み取り中...";
                 }
 
                 const abi = ["function tokenURI(uint256) view returns (string)"];
-                const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+                const contract = new ethers.Contract(targetContract, abi, provider);
 
-                const tokenUri = await contract.tokenURI(TOKEN_ID);
+                const tokenUri = await contract.tokenURI(targetId);
 
                 let metadata;
                 if (tokenUri.startsWith('data:application/json;base64,')) {
                     const base64 = tokenUri.split(',')[1];
                     const jsonStr = atob(base64);
-                    metadata = JSON.parse(jsonStr);
+                    metadata = safeJSONParse(jsonStr);
                 } else {
                     const response = await fetch(tokenUri.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/'));
-                    metadata = await response.json();
+                    const jsonStr = await response.text();
+                    metadata = safeJSONParse(jsonStr);
                 }
 
-                nameDisplay.innerText = metadata.name;
-                descDisplay.innerText = metadata.description;
+                nameDisplay.innerText = metadata.name || "No Name";
+                descDisplay.innerText = metadata.description || "No Description";
 
-                const imageUrl = metadata.image.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
+                const imageUrl = metadata.image ? metadata.image.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/') : '';
                 imageDisplay.src = imageUrl;
 
-                contractDisplay.innerText = CONTRACT_ADDRESS.substring(0, 6) + "..." + CONTRACT_ADDRESS.substring(38);
-                tokenIdDisplay.innerText = TOKEN_ID;
+                contractDisplay.innerText = targetContract.substring(0, 6) + "..." + targetContract.substring(38);
+                tokenIdDisplay.innerText = targetId;
 
                 nftCard.style.display = 'block';
                 loader.style.display = 'none';
-
-                if (readOnly) {
-                    status.innerText = "最新の状態を表示しました（閲覧モード）";
-                }
+                status.innerText = "読み込み完了！";
 
             } catch (err) {
                 console.error(err);
-                if (!readOnly) {
-                    // メタマスク接続に失敗したら公共RPCでリトライ
-                    await loadNFT(true);
-                } else {
-                    status.innerText = "エラー: " + err.message;
-                    loader.style.display = 'none';
-                }
+                status.innerText = "エラー: " + err.message;
+                loader.style.display = 'none';
             }
         }
 
+        loadBtn.addEventListener('click', () => loadNFT(true));
         connectBtn.addEventListener('click', () => loadNFT(false));
     </script>
 </body>
