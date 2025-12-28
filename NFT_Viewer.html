@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,8 +78,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         #nft-image {
@@ -86,7 +94,7 @@
             border-radius: 16px;
             margin-bottom: 25px;
             object-fit: cover;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
         .nft-title {
@@ -134,22 +142,29 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Meow NFT Viewer</h1>
         <p class="subtitle">Suiのように美しくオンチェーン情報を表示します</p>
-        
+
         <button id="connect-btn" class="btn">Connect MetaMask</button>
         <div id="status">ウォレットを接続してロードしてください</div>
         <div id="loader" class="loader"></div>
 
         <div id="nft-card">
-            <img id="nft-image" src="" alt="NFT Image" onerror="this.src='https://placehold.co/400?text=Image+Loading...'">
+            <img id="nft-image" src="" alt="NFT Image"
+                onerror="this.src='https://placehold.co/400?text=Image+Loading...'">
             <div class="nft-title" id="nft-name-display"></div>
             <div class="nft-desc" id="nft-desc-display"></div>
             <div class="meta-info">
@@ -174,61 +189,74 @@
         const contractDisplay = document.getElementById('contract-addr');
         const tokenIdDisplay = document.getElementById('token-id');
 
-        async function loadNFT() {
-            if (!window.ethereum) {
-                alert("MetaMaskをインストールしてください！");
-                return;
-            }
+        // 初期ロードで自動実行
+        window.onload = async () => {
+            await loadNFT(true); // 読み取り専用モード
+        };
 
+        async function loadNFT(readOnly = false) {
             try {
                 loader.style.display = 'block';
-                status.innerText = "データを取得中...";
-                
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const accounts = await provider.send("eth_requestAccounts", []);
-                
-                // コントラクトABI（tokenURIのみ）
+                status.innerText = "オンチェーンデータを取得中...";
+
+                let provider;
+                if (!readOnly && window.ethereum) {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    const accounts = await provider.listAccounts();
+                    status.innerText = "ウォレット接続済み: " + accounts[0].address.substring(0, 6) + "...";
+                    connectBtn.style.display = 'none';
+                } else {
+                    // 公共RPCを使用してメタマスクなしでも表示可能にする
+                    provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
+                    status.innerText = "Sepoliaネットワークから直接読み取り中...";
+                }
+
                 const abi = ["function tokenURI(uint256) view returns (string)"];
                 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
 
-                // オンチェーンからデータを取得
                 const tokenUri = await contract.tokenURI(TOKEN_ID);
-                
-                // JSONに変換
+
                 let metadata;
                 if (tokenUri.startsWith('data:application/json;base64,')) {
                     const base64 = tokenUri.split(',')[1];
                     const jsonStr = atob(base64);
                     metadata = JSON.parse(jsonStr);
                 } else {
-                    const response = await fetch(tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/'));
+                    const response = await fetch(tokenUri.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/'));
                     metadata = await response.json();
                 }
 
-                // 表示に反映
                 nameDisplay.innerText = metadata.name;
                 descDisplay.innerText = metadata.description;
-                
-                // 画像URL。IPFS gateway経由で表示
+
                 const imageUrl = metadata.image.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
                 imageDisplay.src = imageUrl;
-                
+
                 contractDisplay.innerText = CONTRACT_ADDRESS.substring(0, 6) + "..." + CONTRACT_ADDRESS.substring(38);
                 tokenIdDisplay.innerText = TOKEN_ID;
 
                 nftCard.style.display = 'block';
-                status.innerText = "接続済み: " + accounts[0].substring(0,6) + "...";
                 loader.style.display = 'none';
-                connectBtn.style.display = 'none';
+
+                if (readOnly) {
+                    status.innerText = "最新の状態を表示しました（閲覧モード）";
+                }
 
             } catch (err) {
                 console.error(err);
-                status.innerText = "エラーが発生しました: " + err.message;
-                loader.style.display = 'none';
+                if (!readOnly) {
+                    // メタマスク接続に失敗したら公共RPCでリトライ
+                    await loadNFT(true);
+                } else {
+                    status.innerText = "エラー: " + err.message;
+                    loader.style.display = 'none';
+                }
             }
         }
 
-        connectBtn.addEventListener('click', loadNFT);
+        connectBtn.addEventListener('click', () => loadNFT(false));
     </script>
 </body>
+
 </html>
