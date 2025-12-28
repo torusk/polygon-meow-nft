@@ -3,7 +3,6 @@ out/
 cache/
 broadcast/
 .env
-config.env.sample
 check_nft.js
 *.log
 .DS_Store
