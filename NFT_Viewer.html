@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meow NFT Previewer 🐱</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #ec4899;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border: none;
+            padding: 12px 24px;
+            color: white;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        #nft-card {
+            margin-top: 40px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #nft-image {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            object-fit: cover;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .nft-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .nft-desc {
+            font-size: 1rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            text-align: left;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: pre-wrap;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        #status {
+            margin-top: 20px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Meow NFT Viewer</h1>
+        <p class="subtitle">Suiのように美しくオンチェーン情報を表示します</p>
+        
+        <button id="connect-btn" class="btn">Connect MetaMask</button>
+        <div id="status">ウォレットを接続してロードしてください</div>
+        <div id="loader" class="loader"></div>
+
+        <div id="nft-card">
+            <img id="nft-image" src="" alt="NFT Image" onerror="this.src='https://placehold.co/400?text=Image+Loading...'">
+            <div class="nft-title" id="nft-name-display"></div>
+            <div class="nft-desc" id="nft-desc-display"></div>
+            <div class="meta-info">
+                <span>Contract: <span id="contract-addr"></span></span>
+                <span>Token ID: <span id="token-id"></span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 今回デプロイされたコントラクト
+        const CONTRACT_ADDRESS = "0x4d076006A1cb19cc2dc6d826fee444FB7e30a63d";
+        const TOKEN_ID = 0; // 今回ミントしたID
+
+        const connectBtn = document.getElementById('connect-btn');
+        const status = document.getElementById('status');
+        const loader = document.getElementById('loader');
+        const nftCard = document.getElementById('nft-card');
+        const nameDisplay = document.getElementById('nft-name-display');
+        const descDisplay = document.getElementById('nft-desc-display');
+        const imageDisplay = document.getElementById('nft-image');
+        const contractDisplay = document.getElementById('contract-addr');
+        const tokenIdDisplay = document.getElementById('token-id');
+
+        async function loadNFT() {
+            if (!window.ethereum) {
+                alert("MetaMaskをインストールしてください！");
+                return;
+            }
+
+            try {
+                loader.style.display = 'block';
+                status.innerText = "データを取得中...";
+                
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                
+                // コントラクトABI（tokenURIのみ）
+                const abi = ["function tokenURI(uint256) view returns (string)"];
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+
+                // オンチェーンからデータを取得
+                const tokenUri = await contract.tokenURI(TOKEN_ID);
+                
+                // JSONに変換
+                let metadata;
+                if (tokenUri.startsWith('data:application/json;base64,')) {
+                    const base64 = tokenUri.split(',')[1];
+                    const jsonStr = atob(base64);
+                    metadata = JSON.parse(jsonStr);
+                } else {
+                    const response = await fetch(tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/'));
+                    metadata = await response.json();
+                }
+
+                // 表示に反映
+                nameDisplay.innerText = metadata.name;
+                descDisplay.innerText = metadata.description;
+                
+                // 画像URL。IPFS gateway経由で表示
+                const imageUrl = metadata.image.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
+                imageDisplay.src = imageUrl;
+                
+                contractDisplay.innerText = CONTRACT_ADDRESS.substring(0, 6) + "..." + CONTRACT_ADDRESS.substring(38);
+                tokenIdDisplay.innerText = TOKEN_ID;
+
+                nftCard.style.display = 'block';
+                status.innerText = "接続済み: " + accounts[0].substring(0,6) + "...";
+                loader.style.display = 'none';
+                connectBtn.style.display = 'none';
+
+            } catch (err) {
+                console.error(err);
+                status.innerText = "エラーが発生しました: " + err.message;
+                loader.style.display = 'none';
+            }
+        }
+
+        connectBtn.addEventListener('click', loadNFT);
+    </script>
+</body>
+</html>
