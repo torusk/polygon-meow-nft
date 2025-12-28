@@ -29,13 +29,16 @@ contract MeowNFT is ERC721URIStorage, Ownable {
         _safeMint(recipient, tokenId);
 
         // オンチェーンでメタデータを生成
-        // 特殊文字対策として、できるだけ安全な形式で構築します
+        // 特殊文字対策として、引用符をエスケープします
+        string memory safeDescription = _escapeQuotes(description);
+        string memory safeName = _escapeQuotes(name);
+
         string memory json = Base64.encode(
             bytes(
                 string(
                     abi.encodePacked(
-                        '{"name": "', name, '",',
-                        '"description": "', description, '",',
+                        '{"name": "', safeName, '",',
+                        '"description": "', safeDescription, '",',
                         '"image": "', imageURL, '",',
                         '"attributes": [',
                             '{"trait_type": "CreatedBy", "value": "Team Meow Chain"},',
@@ -52,6 +55,30 @@ contract MeowNFT is ERC721URIStorage, Ownable {
         emit MeowMinted(tokenId, msg.sender, name);
 
         return tokenId;
+    }
+
+    /**
+     * @dev JSON文字列内のダブルクォーテーション (") をエスケープ (\") します。
+     */
+    function _escapeQuotes(string memory str) internal pure returns (string memory) {
+        bytes memory b = bytes(str);
+        uint256 count = 0;
+        for (uint256 i = 0; i < b.length; i++) {
+            if (b[i] == '"') count++;
+        }
+        if (count == 0) return str;
+
+        bytes memory res = new bytes(b.length + count);
+        uint256 j = 0;
+        for (uint256 i = 0; i < b.length; i++) {
+            if (b[i] == '"') {
+                res[j++] = "\\";
+                res[j++] = '"';
+            } else {
+                res[j++] = b[i];
+            }
+        }
+        return string(res);
     }
 
     /**

@@ -3,7 +3,7 @@
 # デフォルト設定（Sui版と同じ内容）
 DEFAULT_NAME="Champion 2025 Meow Chain "
 DEFAULT_DESC="Commemorating the victory of Team \"Meow Chain\" at The University of Tokyo Blockchain Innovation Endowed Chair 2025 Group Work Competition. This NFT is independently issued by the team members to honor our collaboration and First Prize achievement."
-DEFAULT_IMAGE="ipfs://bafkreia6x5a4he3lsr5agkzmtzwbydig4qriefh4xcivo2h2vjaft2d6oe"
+DEFAULT_IMAGE="ipfs://bafkreicghzl5r5u7mwapzcedavydpts6zcrajh2guhuqaxqjehibd2rouu"
 
 # Load environment variables
 if [ -f .env ]; then
