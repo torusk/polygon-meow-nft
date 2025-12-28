@@ -52,9 +52,25 @@ cp config.env.sample .env
 3. 「データを読み込む」を押すと、あなたのNFTが「いい感じ」に表示されます！
 
 
+## 💰 費用について (Polygon Mainnet)
+
+Polygonメインネットでの運用コストは非常に低く抑えられます。以下は2025年時点の目安です。
+
+| 操作 | 概算費用 (USD) | 概算費用 (MATIC/POL) | 備考 |
+| :--- | :--- | :--- | :--- |
+| **デプロイ (初回のみ)** | $0.50 ~ $1.50 | 1 ~ 3 MATIC | スマートコントラクト（工場）の設置 |
+| **ミント (1枚あたり)** | $0.01 ~ $0.10 | 0.05 ~ 0.1 MATIC | NFTを1枚発行・配布 |
+
+*※ ネットワークの混雑状況や MATIC/POL の価格変動により前後します。*
+
 ## 💜 本番 (Polygon) への移行
-1. 自分のウォレットに少額の $MATIC を用意します。
+1. 自分のウォレットに少額の $MATIC (または $POL) を用意します。
 2. `deploy.sh` と `distribute.sh` のネットワーク引数を `polygon` に変えて実行するだけです。
+   ```bash
+   ./deploy.sh polygon
+   ./distribute.sh [新アドレス] [宛先アドレス] polygon
+   ```
+
 
 ---
 *Created by torusk with Katana/Antigravity assistance.*
