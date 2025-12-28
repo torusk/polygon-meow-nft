@@ -27,7 +27,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 60px 20px;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -49,46 +49,96 @@
         }
 
         .tagline {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--muted);
             margin-bottom: 24px;
         }
 
-        /* メインの接続ボタン */
-        .hero-section {
+        /* タブ切り替え */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--muted);
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* セクション管理 */
+        .view-section {
             background: #f8fafc;
-            padding: 40px 20px;
+            padding: 30px;
             border-radius: 24px;
             border: 1px solid var(--border);
             margin-bottom: 30px;
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* 手動入力フォーム */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .input-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--muted);
+            margin-left: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-family: inherit;
+            background: white;
         }
 
         .btn-main {
             background-color: var(--primary);
             color: white;
-            padding: 16px 32px;
-            border-radius: 14px;
-            font-size: 1.1rem;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
             font-weight: 700;
             border: none;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2);
+            width: 100%;
+            margin-top: 10px;
         }
 
         .btn-main:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.2);
+            transform: translateY(-1px);
         }
 
-        .btn-main:disabled {
-            background-color: var(--muted);
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* NFTカード表示エリア */
+        /* NFTカード */
         #nft-container {
             display: grid;
             gap: 30px;
@@ -102,13 +152,13 @@
             padding: 24px;
             text-align: left;
             box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-            animation: slideUp 0.5s ease-out;
+            animation: slideUp 0.4s ease-out;
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(15px);
             }
 
             to {
@@ -148,13 +198,15 @@
         .nft-meta {
             font-size: 0.8rem;
             color: var(--muted);
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        /* ローディングとステータス */
         #status {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--muted);
             margin-top: 15px;
         }
@@ -175,94 +227,77 @@
                 transform: rotate(360deg);
             }
         }
-
-        /* アドバンス設定（隠しメニュー） */
-        .advanced-toggle {
-            margin-top: 60px;
-            font-size: 0.8rem;
-            color: var(--muted);
-            text-decoration: underline;
-            cursor: pointer;
-            opacity: 0.6;
-        }
-
-        #advanced-panel {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: #fcfcfc;
-            border: 1px dashed var(--border);
-            border-radius: 16px;
-            text-align: left;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--muted);
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <header>
-            <h1>Your Meow Collection</h1>
-            <p class="tagline">メタマスクを繋いで、あなたのNFTを見つけよう</p>
+            <h1>Meow NFT Explorer</h1>
+            <p class="tagline">オンチェーン情報を Sui のように美しく表示します</p>
         </header>
 
-        <div class="hero-section">
-            <button id="connect-btn" class="btn-main">Connect Wallet</button>
-            <div id="status">ウォレットを接続すると自動でスキャンを開始します</div>
-            <div id="loader" class="loader"></div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('manual')">IDで検索</button>
+            <button class="tab-btn" onclick="switchTab('wallet')">ウォレットをスキャン</button>
         </div>
+
+        <!-- 手動入力セクション -->
+        <div id="manual-section" class="view-section active">
+            <div class="input-group">
+                <div>
+                    <label class="input-label">Contract Address</label>
+                    <input type="text" id="contract-input" placeholder="0x...">
+                </div>
+                <div>
+                    <label class="input-label">Token ID</label>
+                    <input type="number" id="id-input" placeholder="0">
+                </div>
+                <button id="load-btn" class="btn-main">データを読み込む</button>
+            </div>
+        </div>
+
+        <!-- ウォレットスキャンセクション -->
+        <div id="wallet-section" class="view-section">
+            <p style="font-size: 0.9rem; margin-bottom: 20px; color: var(--muted);">
+                MetaMaskを接続して、あなたが所有しているNFTを自動で見つけます。
+            </p>
+            <button id="connect-btn" class="btn-main">Connect MetaMask</button>
+        </div>
+
+        <div id="status">情報を入力して検索、またはウォレットを接続してください</div>
+        <div id="loader" class="loader"></div>
 
         <div id="nft-container">
             <!-- ここにNFTが表示される -->
         </div>
-
-        <div class="advanced-toggle" onclick="toggleAdvanced()">Advanced Settings (API/Contract)</div>
-        <div id="advanced-panel">
-            <label class="input-label">Contract Address</label>
-            <input type="text" id="contract-input" placeholder="0x...">
-
-            <label class="input-label">RPC URL (Sepolia)</label>
-            <input type="text" id="rpc-input" value="https://ethereum-sepolia-rpc.publicnode.com">
-
-            <p style="font-size: 0.75rem; color: var(--muted);">
-                ※デフォルトでは最新のMeowNFTコントラクトをスキャンします。
-            </p>
-        </div>
     </div>
 
     <script>
-        // デフォルトのコントラクト情報
         const DEFAULT_CONTRACT = "0x27188ac3AFE630d3468F532a9dD787bC412CC024";
+        const RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
 
+        const loadBtn = document.getElementById('load-btn');
         const connectBtn = document.getElementById('connect-btn');
         const status = document.getElementById('status');
         const loader = document.getElementById('loader');
         const nftContainer = document.getElementById('nft-container');
         const contractInput = document.getElementById('contract-input');
-        const rpcInput = document.getElementById('rpc-input');
+        const idInput = document.getElementById('id-input');
 
         contractInput.value = DEFAULT_CONTRACT;
 
-        function toggleAdvanced() {
-            const panel = document.getElementById('advanced-panel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+
+            if (tab === 'manual') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('manual-section').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('wallet-section').classList.add('active');
+            }
         }
 
         function safeJSONParse(str) {
@@ -275,63 +310,68 @@
             }
         }
 
-        async function scanNFTs() {
-            if (!window.ethereum) {
-                alert("MetaMaskをインストールしてください！");
-                return;
-            }
+        // 手動読み込み
+        async function loadManual() {
+            const addr = contractInput.value.trim();
+            const id = idInput.value.trim();
+            if (!addr || id === "") return;
 
             try {
-                connectBtn.disabled = true;
                 loader.style.display = 'block';
                 nftContainer.innerHTML = '';
-                status.innerText = "ウォレットに接続中...";
+                status.innerText = "データを取得中...";
 
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const accounts = await provider.send("eth_requestAccounts", []);
-                const userAddress = accounts[0];
+                const provider = new ethers.JsonRpcProvider(RPC_URL);
+                const abi = ["function tokenURI(uint256) view returns (string)"];
+                const contract = new ethers.Contract(addr, abi, provider);
 
-                status.innerText = "NFTをスキャン中... (ID 0〜20)";
-
-                const contractAddress = contractInput.value.trim();
-                const abi = [
-                    "function tokenURI(uint256) view returns (string)",
-                    "function ownerOf(uint256) view returns (address)"
-                ];
-                const contract = new ethers.Contract(contractAddress, abi, provider);
-
-                let foundCount = 0;
-                // 今回はチーム用なのでID 0〜20をスキャン
-                for (let i = 0; i <= 20; i++) {
-                    try {
-                        const owner = await contract.ownerOf(i);
-                        if (owner.toLowerCase() === userAddress.toLowerCase()) {
-                            status.innerText = `見つかりました！ ID: ${i} を読込中...`;
-                            await renderNFT(contract, i);
-                            foundCount++;
-                        }
-                    } catch (e) {
-                        // IDが存在しない場合はスキップ
-                        continue;
-                    }
-                }
+                await renderNFT(contract, id);
 
                 loader.style.display = 'none';
-                connectBtn.disabled = false;
-
-                if (foundCount > 0) {
-                    status.innerText = `${foundCount} 個のNFTが見つかりました！`;
-                    connectBtn.innerText = "Rescan Wallet";
-                } else {
-                    status.innerText = "このウォレットにはNFTが見つかりませんでした。";
-                    connectBtn.innerText = "Scan Again";
-                }
-
+                status.innerText = "読み込み完了！";
             } catch (err) {
                 console.error(err);
                 status.innerText = "エラー: " + err.message;
                 loader.style.display = 'none';
-                connectBtn.disabled = false;
+            }
+        }
+
+        // ウォレットスキャン
+        async function scanWallet() {
+            if (!window.ethereum) { alert("MetaMaskをインストールしてください！"); return; }
+            try {
+                loader.style.display = 'block';
+                nftContainer.innerHTML = '';
+                status.innerText = "接続中...";
+
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                const user = accounts[0];
+
+                status.innerText = "スキャン中...";
+                const addr = contractInput.value.trim();
+                const abi = [
+                    "function tokenURI(uint256) view returns (string)",
+                    "function ownerOf(uint256) view returns (address)"
+                ];
+                const contract = new ethers.Contract(addr, abi, provider);
+
+                let count = 0;
+                for (let i = 0; i <= 20; i++) {
+                    try {
+                        const owner = await contract.ownerOf(i);
+                        if (owner.toLowerCase() === user.toLowerCase()) {
+                            await renderNFT(contract, i);
+                            count++;
+                        }
+                    } catch (e) { continue; }
+                }
+
+                loader.style.display = 'none';
+                status.innerText = count > 0 ? `${count} 個見つかりました！` : "見つかりませんでした。";
+            } catch (err) {
+                status.innerText = "エラー: " + err.message;
+                loader.style.display = 'none';
             }
         }
 
@@ -349,7 +389,6 @@
 
             const card = document.createElement('div');
             card.className = 'nft-card';
-
             const imageUrl = metadata.image.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/');
 
             card.innerHTML = `
@@ -357,14 +396,25 @@
                 <div class="nft-title">${metadata.name || 'No Name'}</div>
                 <div class="nft-desc">${metadata.description || 'No Description'}</div>
                 <div class="nft-meta">
-                    <span>Token ID: ${id}</span>
-                    <span>Verified Meow NFT</span>
+                    <span><strong>Token ID:</strong> ${id}</span>
+                    <span><strong>Contract:</strong> ${contract.target.substring(0, 10)}...</span>
                 </div>
             `;
             nftContainer.appendChild(card);
         }
 
-        connectBtn.addEventListener('click', scanNFTs);
+        // 初期ロード
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('contract')) contractInput.value = params.get('contract');
+            if (params.get('id')) {
+                idInput.value = params.get('id');
+                loadManual();
+            }
+        };
+
+        loadBtn.addEventListener('click', loadManual);
+        connectBtn.addEventListener('click', scanWallet);
     </script>
 </body>
 
